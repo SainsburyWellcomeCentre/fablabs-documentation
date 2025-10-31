@@ -126,8 +126,8 @@ async function showRepo(name) {
     loading.style.display = 'block';
     err.style.display = 'none';
 
-    /* ---------- 1. Fetch repo metadata (includes default_branch) ---------- */
-    let defaultBranch = 'main';  // safe fallback
+    /* ---------- 1. Fetch default_branch ---------- */
+    let defaultBranch = 'main';
     try {
         const repoRes = await fetch(`${API_BASE}/repos/${ORG}/${name}`);
         if (repoRes.ok) {
@@ -135,7 +135,7 @@ async function showRepo(name) {
             defaultBranch = repoData.default_branch || 'main';
         }
     } catch (e) {
-        console.warn(`Could not fetch default branch for ${name}, using 'main'`);
+        console.warn(`Using 'main' for ${name}`);
     }
 
     /* ---------- 2. Latest Release Link ---------- */
@@ -152,15 +152,41 @@ async function showRepo(name) {
         releaseHtml = '<div class="release-link"><strong>Latest Release:</strong> No releases yet</div>';
     }
 
-    /* ---------- 3. Custom content (from repo or fallback) ---------- */
-    let custom = {};
+    /* ---------- 3. Load altium-viewer.json (supports multiple) ---------- */
+    let viewersHtml = '';
     try {
-        const customRes = await fetch(`https://raw.githubusercontent.com/${ORG}/${name}/${defaultBranch}/altium-viewer.json`);
-        if (customRes.ok) {
-            custom = await customRes.json();
+        const viewerRes = await fetch(`https://raw.githubusercontent.com/${ORG}/${name}/${defaultBranch}/altium-viewer.json`);
+        if (viewerRes.ok) {
+            const viewerData = await viewerRes.json();
+            const addresses = viewerData.address;
+
+            if (addresses && typeof addresses === 'object') {
+                const tabs = Object.keys(addresses);
+                if (tabs.length > 0) {
+                    viewersHtml = `
+                        <div id="viewer" class="altium-viewer-section">
+                            <h2>Altium Viewer</h2>
+                            <div class="altium-tabs">
+                                <div class="altium-tab-buttons">
+                                    ${tabs.map((key, i) => {
+                                        const label = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                        return `<button class="altium-tab-btn ${i === 0 ? 'active' : ''}" data-tab="${key}">${label}</button>`;
+                                    }).join('')}
+                                </div>
+                                <div class="altium-tab-content">
+                                    ${tabs.map((key, i) => {
+                                        const iframeHtml = addAltiumViewer(addresses[key]);
+                                        return `<div class="altium-tab-pane ${i === 0 ? 'active' : ''}" data-tab="${key}">${iframeHtml}</div>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
         }
     } catch (e) {
-        custom = customContent[name] || {};
+        console.log(`No altium-viewer.json in ${name}`);
     }
 
     /* ---------- 4. Fetch README ---------- */
@@ -169,19 +195,15 @@ async function showRepo(name) {
         const res = await fetch(`${API_BASE}/repos/${ORG}/${name}/readme`);
         if (!res.ok) throw new Error();
         const data = await res.json();
-
-        // UTF-8 decode (fixes narrow no-break space)
         const binary = atob(data.content);
-        markdown = new TextDecoder('utf-8').decode(
-            Uint8Array.from(binary, c => c.charCodeAt(0))
-        );
+        markdown = new TextDecoder('utf-8').decode(Uint8Array.from(binary, c => c.charCodeAt(0)));
     } catch {
         content.innerHTML = '<p class="error">Could not load README.</p>';
         loading.style.display = 'none';
         return;
     }
 
-    /* ---------- 5. Fix relative URLs using correct branch ---------- */
+    /* ---------- 5. Fix relative URLs ---------- */
     const rawBase = `https://raw.githubusercontent.com/${ORG}/${name}/${defaultBranch}`;
     markdown = markdown
         .replace(/\]\((?!https?:\/\/|\/)([^)]+)\)/g, `](${rawBase}/$1)`)
@@ -190,12 +212,34 @@ async function showRepo(name) {
     /* ---------- 6. Render Markdown ---------- */
     content.innerHTML = marked.parse(markdown);
 
-    /* ---------- 7. Inject: Release → Custom Before → Highlight → Emojis → Custom After ---------- */
-    content.insertAdjacentHTML('afterbegin', releaseHtml);
-    if (custom.before) content.insertAdjacentHTML('afterbegin', custom.before);
+    /* ---------- 7. Render and inject everything ---------- */
+    content.innerHTML = marked.parse(markdown);
 
-    /* ---------- 8. Inject custom AFTER ---------- */
-    if (custom.after) content.insertAdjacentHTML('beforeend', custom.after);
+    // Inject release link at top
+    content.insertAdjacentHTML('afterbegin', releaseHtml);
+
+    // === NEW: Inject viewer at BOTTOM ===
+    if (viewersHtml) {
+        content.insertAdjacentHTML('beforeend', viewersHtml);
+
+        // Tab switching logic
+        content.querySelectorAll('.altium-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                content.querySelectorAll('.altium-tab-btn').forEach(b => b.classList.remove('active'));
+                content.querySelectorAll('.altium-tab-pane').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                content.querySelector(`.altium-tab-pane[data-tab="${tab}"]`).classList.add('active');
+            });
+        });
+
+        // Auto-scroll to #viewer if URL has #viewer
+        if (location.hash === '#viewer') {
+            setTimeout(() => {
+                document.getElementById('viewer')?.scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+        }
+    }
 
     loading.style.display = 'none';
 }
@@ -216,20 +260,9 @@ window.addEventListener('popstate', () => {
         document.getElementById('list-view').style.display = 'block';
     }
 });
-
 function addAltiumViewer(address) {
-    const iframe = document.createElement('iframe');
+    return `<body><iframe src="${address}" width="1280" height="720" style="overflow:hidden;border:none;width:100%;height:720px;" scrolling="no" allowfullscreen="true" onload="window.top.scrollTo(0,0);"></iframe></body>`;
 
-    iframe.src = address;
-    iframe.width = "1280";
-    iframe.height = "720";
-    iframe.style.overflow = "hidden";
-    iframe.style.border = "none";
-    iframe.style.width = "100%";
-    iframe.style.height = "720px";
-    iframe.allowFullscreen = true;
-    iframe.onload = () => window.top.scrollTo(0, 0);
-    return iframe;
 }
 
 function checkHash() {
