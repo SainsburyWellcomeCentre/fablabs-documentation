@@ -126,37 +126,51 @@ async function showRepo(name) {
     loading.style.display = 'block';
     err.style.display = 'none';
 
-    /* ---------- 1. Fetch repo metadata for default_branch ---------- */
-    let defaultBranch = 'main'; // fallback
+    /* ---------- 1. Fetch repo metadata (includes default_branch) ---------- */
+    let defaultBranch = 'main';  // safe fallback
     try {
         const repoRes = await fetch(`${API_BASE}/repos/${ORG}/${name}`);
-        const repoData = await repoRes.json();
-        defaultBranch = repoData.default_branch || 'main';
+        if (repoRes.ok) {
+            const repoData = await repoRes.json();
+            defaultBranch = repoData.default_branch || 'main';
+        }
     } catch (e) {
         console.warn(`Could not fetch default branch for ${name}, using 'main'`);
     }
 
-    /* ---------- 2. Custom content (repo-local or fallback) ---------- */
+    /* ---------- 2. Latest Release Link ---------- */
+    let releaseHtml = '';
+    try {
+        const releaseRes = await fetch(`${API_BASE}/repos/${ORG}/${name}/releases/latest`);
+        if (releaseRes.ok) {
+            const r = await releaseRes.json();
+            releaseHtml = `<div class="release-link"><strong>Latest Release:</strong> <a href="${r.html_url}" target="_blank">${r.tag_name}</a></div>`;
+        } else {
+            releaseHtml = '<div class="release-link"><strong>Latest Release:</strong> No releases yet</div>';
+        }
+    } catch {
+        releaseHtml = '<div class="release-link"><strong>Latest Release:</strong> No releases yet</div>';
+    }
+
+    /* ---------- 3. Custom content (from repo or fallback) ---------- */
     let custom = {};
     try {
-        const customRes = await fetch(`https://raw.githubusercontent.com/${ORG}/${name}/${defaultBranch}/xai-docs.json`);
+        const customRes = await fetch(`https://raw.githubusercontent.com/${ORG}/${name}/${defaultBranch}/altium-viewer.json`);
         if (customRes.ok) {
             custom = await customRes.json();
-            console.log(`Loaded custom from ${name}/${defaultBranch}/xai-docs.json`);
         }
     } catch (e) {
-        // Fallback to local custom.json
         custom = customContent[name] || {};
     }
 
-    /* ---------- 3. Fetch README ---------- */
+    /* ---------- 4. Fetch README ---------- */
     let markdown = '';
     try {
         const res = await fetch(`${API_BASE}/repos/${ORG}/${name}/readme`);
         if (!res.ok) throw new Error();
         const data = await res.json();
 
-        // ----- UTF-8 decode (from previous fix) -----
+        // UTF-8 decode (fixes narrow no-break space)
         const binary = atob(data.content);
         markdown = new TextDecoder('utf-8').decode(
             Uint8Array.from(binary, c => c.charCodeAt(0))
@@ -167,16 +181,17 @@ async function showRepo(name) {
         return;
     }
 
-    /* ---------- 4. Make relative links absolute (dynamic branch) ---------- */
+    /* ---------- 5. Fix relative URLs using correct branch ---------- */
     const rawBase = `https://raw.githubusercontent.com/${ORG}/${name}/${defaultBranch}`;
     markdown = markdown
-        .replace(/\]\((?!https?:\/\/|\/)([^)]+)\)/g, `](${rawBase}/$1)`)   // images / links
-        .replace(/src="(?!https?:\/\/|\/)([^"]+)"/g, `src="${rawBase}/$1"`); // inline src
+        .replace(/\]\((?!https?:\/\/|\/)([^)]+)\)/g, `](${rawBase}/$1)`)
+        .replace(/src="(?!https?:\/\/|\/)([^"]+)"/g, `src="${rawBase}/$1"`);
 
-    /* ---------- 5. Render Markdown ---------- */
+    /* ---------- 6. Render Markdown ---------- */
     content.innerHTML = marked.parse(markdown);
 
-    /* ---------- 6. Inject custom BEFORE ---------- */
+    /* ---------- 7. Inject: Release → Custom Before → Highlight → Emojis → Custom After ---------- */
+    content.insertAdjacentHTML('afterbegin', releaseHtml);
     if (custom.before) content.insertAdjacentHTML('afterbegin', custom.before);
 
     /* ---------- 8. Inject custom AFTER ---------- */
@@ -201,6 +216,21 @@ window.addEventListener('popstate', () => {
         document.getElementById('list-view').style.display = 'block';
     }
 });
+
+function addAltiumViewer(address) {
+    const iframe = document.createElement('iframe');
+
+    iframe.src = address;
+    iframe.width = "1280";
+    iframe.height = "720";
+    iframe.style.overflow = "hidden";
+    iframe.style.border = "none";
+    iframe.style.width = "100%";
+    iframe.style.height = "720px";
+    iframe.allowFullscreen = true;
+    iframe.onload = () => window.top.scrollTo(0, 0);
+    return iframe;
+}
 
 function checkHash() {
     const hash = location.hash.slice(1);
