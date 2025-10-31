@@ -1,17 +1,59 @@
 <!DOCTYPE html>
-<html>
-  <p>Embedding A365 viewer:</p>
-  <body>
-    <div align="center">
-      <iframe
-        src="https://personal-viewer.365.altium.com/client/index.html?feature=embed&source=B80F05A1-854C-4E90-BA5C-2CB8DC030E64&activeView=PCB"
-        width="1280"
-        height="720"
-        style="overflow: hidden; border: none; width: 100%; height: 720px"
-        scrolling="no"
-        allowfullscreen="true"
-        onload="window.top.scrollTo(0,0);"
-      ></iframe>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xAI Repos • Dynamic Docs</title>
+    <meta name="description" content="All xAI GitHub repos with live README docs.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <h1>xAI GitHub Repositories</h1>
+        <button id="theme-toggle" class="theme-btn" aria-label="Toggle dark mode">Dark Mode</button>
     </div>
-  </body>
+    <p class="subtitle">
+        All public repos with <strong>live README documentation</strong>
+    </p>
+    <p style="margin-top:1rem;font-size:.95rem;color:#888;">
+        Last refreshed: <span id="last-refresh">—</span> · <span id="repo-count">—</span> repos
+    </p>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search repos..." aria-label="Search repositories">
+        <button id="clear-search" class="clear-btn" style="display:none;">Clear</button>
+    </div>
+</header>
+
+<!-- List View -->
+<div id="list-view">
+    <div id="loading" class="loading">Fetching repositories from GitHub...</div>
+    <div id="error" class="error" style="display:none;"></div>
+    <div id="repo-grid" class="repo-grid"></div>
+</div>
+
+<!-- Detail View -->
+<div id="detail-view">
+    <div class="detail-header">
+        <a href="#" id="back-btn" class="back-btn">Back to All Repos</a>
+        <a href="#" id="github-btn" class="github-btn" target="_blank">View on GitHub</a>
+    </div>
+    <h1 id="detail-title"></h1>
+    <div id="detail-meta" style="color:#666;font-size:.95rem;margin-bottom:1rem;"></div>
+    <div id="detail-content"></div>
+    <div id="detail-loading" class="loading">Loading README...</div>
+    <div id="detail-error" class="error" style="display:none;"></div>
+</div>
+
+<footer>
+    <p>&copy; 2025 FabLabs Sainsbury Wellcome Centre. Built with ❤️ for open source.</p>
+</footer>
+
+<script src="script.js" defer></script>
+</body>
 </html>
