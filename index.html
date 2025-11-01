@@ -1,59 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>xAI Repos • Dynamic Docs</title>
-    <meta name="description" content="All xAI GitHub repos with live README docs.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FabLabs Repos • Dynamic Docs</title>
+    <meta
+      name="description"
+      content="All FabLabs GitHub repos with live README docs."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
 
-<header>
-    <div class="header-top">
-        <h1>xAI GitHub Repositories</h1>
-        <button id="theme-toggle" class="theme-btn" aria-label="Toggle dark mode">Dark Mode</button>
+    <header>
+        <div class="header-content">
+        <div class="header-top">
+            <!-- UCL Logo on the left -->
+            <div class="header-logo">
+                <img src="https://www.sainsburywellcome.org/web/themes/custom/ucl/logo.svg" alt="UCL Logo" class="ucl-logo">
+            </div>
+
+            <!-- Title in the center -->
+            <h1>FabLabs Documentation</h1>
+
+            <!-- Theme toggle on the right -->
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark mode">
+                <div class="theme-icon">
+                    <!-- SUN -->
+                    <svg class="sun" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <g transform="translate(12,12)">
+                            <circle r="5" fill="currentColor"/>
+                            <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                <line x1="0" y1="-10" x2="0" y2="-7"/>
+                                <line x1="0" y1="10" x2="0" y2="7"/>
+                                <line x1="-10" y1="0" x2="-7" y2="0"/>
+                                <line x1="10" y1="0" x2="7" y2="0"/>
+                                <line x1="-7.07" y1="-7.07" x2="-5" y2="-5"/>
+                                <line x1="7.07" y1="-7.07" x2="5" y2="-5"/>
+                                <line x1="-7.07" y1="7.07" x2="-5" y2="5"/>
+                                <line x1="7.07" y1="7.07" x2="5" y2="5"/>
+                            </g>
+                        </g>
+                    </svg>
+                    <!-- MOON -->
+                    <svg class="moon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                </div>
+            </button>
+        </div>
+        <p class="subtitle">Dynamic documentation for FabLabs repositories</p>
+
+      <!-- Search Bar -->
+      <div class="search-container">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search repos..."
+          aria-label="Search repositories"
+        />
+        <button id="clear-search" class="clear-btn" style="display: none">
+          x
+        </button>
+      </div>
+              <p style="margin-top: 1rem; font-size: 0.75rem; color: #888">
+            Last refreshed: <span id="last-refresh">—</span> ·
+            <span id="repo-count">—</span> repos
+        </p>
+      </div>
+    </header>
+
+    <!-- List View -->
+    <div id="list-view">
+      <div id="loading" class="loading">
+        Fetching repositories from GitHub...
+      </div>
+      <div id="error" class="error" style="display: none"></div>
+      <div id="repo-grid" class="repo-grid"></div>
     </div>
-    <p class="subtitle">
-        All public repos with <strong>live README documentation</strong>
-    </p>
-    <p style="margin-top:1rem;font-size:.95rem;color:#888;">
-        Last refreshed: <span id="last-refresh">—</span> · <span id="repo-count">—</span> repos
-    </p>
 
-    <!-- Search Bar -->
-    <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search repos..." aria-label="Search repositories">
-        <button id="clear-search" class="clear-btn" style="display:none;">Clear</button>
-    </div>
-</header>
-
-<!-- List View -->
-<div id="list-view">
-    <div id="loading" class="loading">Fetching repositories from GitHub...</div>
-    <div id="error" class="error" style="display:none;"></div>
-    <div id="repo-grid" class="repo-grid"></div>
-</div>
-
-<!-- Detail View -->
-<div id="detail-view">
-    <div class="detail-header">
+    <!-- Detail View -->
+    <div id="detail-view">
+      <div class="detail-header">
         <a href="#" id="back-btn" class="back-btn">Back to All Repos</a>
-        <a href="#" id="github-btn" class="github-btn" target="_blank">View on GitHub</a>
+        <a href="#" id="github-btn" class="github-btn" target="_blank"
+          >View on GitHub</a
+        >
+      </div>
+      <h1 id="detail-title"></h1>
+      <div
+        id="detail-meta"
+        style="color: #666; font-size: 0.95rem; margin-bottom: 1rem"
+      ></div>
+      <div id="detail-content"></div>
+      <div id="detail-loading" class="loading">Loading README...</div>
+      <div id="detail-error" class="error" style="display: none"></div>
     </div>
-    <h1 id="detail-title"></h1>
-    <div id="detail-meta" style="color:#666;font-size:.95rem;margin-bottom:1rem;"></div>
-    <div id="detail-content"></div>
-    <div id="detail-loading" class="loading">Loading README...</div>
-    <div id="detail-error" class="error" style="display:none;"></div>
-</div>
 
-<footer>
-    <p>&copy; 2025 FabLabs Sainsbury Wellcome Centre. Built with ❤️ for open source.</p>
-</footer>
+    <footer>
+      <p>
+        Copyright &copy; 2025 FabLabs Sainsbury Wellcome Centre
+      </p>
+    </footer>
 
-<script src="script.js" defer></script>
-</body>
+    <script src="script.js" defer></script>
+  </body>
 </html>

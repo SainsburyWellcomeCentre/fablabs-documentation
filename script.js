@@ -19,19 +19,22 @@ async function loadCustomContent() {
 
 // ——— Theme Toggle ———
 function initTheme() {
-    const toggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const saved = localStorage.getItem('theme');
-    const isDark = saved === 'dark' || (!saved && prefersDark);
 
-    document.documentElement.classList.toggle('dark-mode', isDark);
-    toggle.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+    // Apply saved theme, or system preference if none saved
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        body.classList.add('dark');
+    } else {
+        body.classList.remove('dark');
+    }
 
-    toggle.addEventListener('click', () => {
-        const willBeDark = !document.documentElement.classList.contains('dark-mode');
-        document.documentElement.classList.toggle('dark-mode', willBeDark);
-        toggle.textContent = willBeDark ? 'Light Mode' : 'Dark Mode';
-        localStorage.setItem('theme', willBeDark ? 'dark' : 'light');
+    // Optional: Listen for system theme changes (only if user hasn't chosen)
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            body.classList.toggle('dark', e.matches);
+        }
     });
 }
 
@@ -152,7 +155,7 @@ async function showRepo(name) {
         releaseHtml = '<div class="release-link"><strong>Latest Release:</strong> No releases yet</div>';
     }
 
-    /* ---------- 3. Load altium-viewer.json (supports multiple) ---------- */
+    /* ---------- 3. Load altium-viewer.json (multiple tabs) ---------- */
     let viewersHtml = '';
     try {
         const viewerRes = await fetch(`https://raw.githubusercontent.com/${ORG}/${name}/${defaultBranch}/altium-viewer.json`);
@@ -165,7 +168,7 @@ async function showRepo(name) {
                 if (tabs.length > 0) {
                     viewersHtml = `
                         <div id="viewer" class="altium-viewer-section">
-                            <h2>Altium Viewer</h2>
+                            <h2>PCB Viewer</h2>
                             <div class="altium-tabs">
                                 <div class="altium-tab-buttons">
                                     ${tabs.map((key, i) => {
@@ -195,8 +198,11 @@ async function showRepo(name) {
         const res = await fetch(`${API_BASE}/repos/${ORG}/${name}/readme`);
         if (!res.ok) throw new Error();
         const data = await res.json();
+
         const binary = atob(data.content);
-        markdown = new TextDecoder('utf-8').decode(Uint8Array.from(binary, c => c.charCodeAt(0)));
+        markdown = new TextDecoder('utf-8').decode(
+            Uint8Array.from(binary, c => c.charCodeAt(0))
+        );
     } catch {
         content.innerHTML = '<p class="error">Could not load README.</p>';
         loading.style.display = 'none';
@@ -209,20 +215,54 @@ async function showRepo(name) {
         .replace(/\]\((?!https?:\/\/|\/)([^)]+)\)/g, `](${rawBase}/$1)`)
         .replace(/src="(?!https?:\/\/|\/)([^"]+)"/g, `src="${rawBase}/$1"`);
 
-    /* ---------- 6. Render Markdown ---------- */
-    content.innerHTML = marked.parse(markdown);
+    /* ---------- 7. Render Markdown ---------- */
+content.innerHTML = marked.parse(markdown);
 
-    /* ---------- 7. Render and inject everything ---------- */
-    content.innerHTML = marked.parse(markdown);
+/* ---------- 8. Fetch release + build top bar ---------- */
+let releaseText = 'No releases yet';
+let releaseUrl = '#';
+try {
+    const releaseRes = await fetch(`${API_BASE}/repos/${ORG}/${name}/releases/latest`);
+    if (releaseRes.ok) {
+        const r = await releaseRes.json();
+        releaseText = r.tag_name || 'Unknown';
+        releaseUrl = r.html_url;
+    }
+} catch {}
 
-    // Inject release link at top
-    content.insertAdjacentHTML('afterbegin', releaseHtml);
+/* ---------- 9. Inject: Release (left) + Jump Button with SVG down arrow (right) ---------- */
+if (viewersHtml) {
+    const topBar = `
+        <div class="release-jump-container">
+            <div class="release-link">
+                <strong>Latest Release:</strong> 
+                <a href="${releaseUrl}" target="_blank">${releaseText}</a>
+            </div>
+            <div class="jump-to-viewer">
+                <button id="jump-viewer-btn" class="jump-btn">
+                    Jump to PCB Viewer
+                    <svg class="jump-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `;
+    content.insertAdjacentHTML('afterbegin', topBar);
+} else {
+    content.insertAdjacentHTML('afterbegin', `
+        <div class="release-link">
+            <strong>Latest Release:</strong> 
+            <a href="${releaseUrl}" target="_blank">${releaseText}</a>
+        </div>
+    `);
+}
 
-    // === NEW: Inject viewer at BOTTOM ===
+    /* ---------- 9. Inject viewer at BOTTOM + tab logic ---------- */
     if (viewersHtml) {
         content.insertAdjacentHTML('beforeend', viewersHtml);
 
-        // Tab switching logic
+        // Tab switching
         content.querySelectorAll('.altium-tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const tab = btn.dataset.tab;
@@ -233,7 +273,12 @@ async function showRepo(name) {
             });
         });
 
-        // Auto-scroll to #viewer if URL has #viewer
+        // Jump button click
+        document.getElementById('jump-viewer-btn')?.addEventListener('click', () => {
+            document.getElementById('viewer')?.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Auto-scroll if URL has #viewer
         if (location.hash === '#viewer') {
             setTimeout(() => {
                 document.getElementById('viewer')?.scrollIntoView({ behavior: 'smooth' });
@@ -260,6 +305,50 @@ window.addEventListener('popstate', () => {
         document.getElementById('list-view').style.display = 'block';
     }
 });
+
+// ———————————————————————— THEME TOGGLE (ICON ONLY) ————————————————————————
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+
+    if (!themeToggle) return;
+
+    // Load saved or system theme
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    const applyTheme = (dark) => {
+        body.classList.toggle('dark', dark);
+    };
+
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        applyTheme(true);
+    } else {
+        applyTheme(false);
+    }
+
+    // Toggle on click
+    themeToggle.addEventListener('click', () => {
+        const isDark = body.classList.contains('dark');
+        applyTheme(!isDark);
+        localStorage.setItem('theme', !isDark ? 'dark' : 'light');
+    });
+
+    // Sync with system (only if no manual choice)
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            applyTheme(e.matches);
+        }
+    });
+});
+
+// Optional: Sync with system changes (only if no manual choice)
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+        body.classList.toggle('dark', e.matches);
+    }
+});
+
 function addAltiumViewer(address) {
     return `<body><iframe src="${address}" width="1280" height="720" style="overflow:hidden;border:none;width:100%;height:720px;" scrolling="no" allowfullscreen="true" onload="window.top.scrollTo(0,0);"></iframe></body>`;
 
