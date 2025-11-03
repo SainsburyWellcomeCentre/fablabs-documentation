@@ -6,12 +6,9 @@ This repository contains the official documentation for the FabLabs at the Sains
 
 > **Note:** The following README context is for the development. If you would like to see the actual content of the FabLabs documentation, please refer to [the documentation page](https://sainsburywellcomecentre.github.io/fablabs-documentation/).
 
-## Development
+## Getting Started
 
 This website is deployed using [GitHub Pages](https://pages.github.com/). No additional build tools are required as this is a static site.
-
-### Getting Started
-
 To get started with local development, you can simply clone the repository and open the `index.html` file in your web browser.
 
 ```bash
@@ -20,9 +17,28 @@ cd fablabs-documentation
 open index.html
 ```
 
-### Layout
+## Dependencies
 
-#### Main Page
+- **GitHub REST API**: The website uses [GitHub REST API](https://docs.github.com/en/rest) to fetch the content of the documentation from the repositories that have been tagged with the `swc-fablabs` topic.
+- **npm-marked**: The content is then rendered with [marked](https://github.com/markedjs/marked).
+- **Altium Embedded Viewer**: For rendering Altium files, the [Altium Embedded Viewer](https://www.altium.com/altium-designer/embedded-viewer) is used.
+
+## Add custom content
+
+To add custom content to the documentation, you can create a `custom.json` file in the root of the repository. This file should contain an object with the following structure:
+
+```json
+{
+  "repo-name": {
+    "before": "<hr><h2>Introduction</h2><p>This is a custom introduction added before the README content.</p>",
+    "after": "<hr><h2>Introduction</h2><p>This is a custom introduction added after the README content.</p>"
+  }
+}
+```
+
+## Layout
+
+### Main Page
 
 ```bash
 ┌────────────────────────────────────────────────────────────────────┐
@@ -47,7 +63,7 @@ open index.html
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Subpage
+### Subpage
 
 ```bash
 ┌────────────────────────────────────────────────────────────────────┐
@@ -78,26 +94,7 @@ open index.html
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### Dependencies
-
-- **GitHub REST API**: The website uses [GitHub REST API](https://docs.github.com/en/rest) to fetch the content of the documentation from the repositories that have been tagged with the `swc-fablabs` topic.
-- **npm-marked**: The content is then rendered with [marked](https://github.com/markedjs/marked).
-- **Altium Embedded Viewer**: For rendering Altium files, the [Altium Embedded Viewer](https://www.altium.com/altium-designer/embedded-viewer) is used.
-
-### Add custom content
-
-To add custom content to the documentation, you can create a `custom.json` file in the root of the repository. This file should contain an object with the following structure:
-
-```json
-{
-  "repo-name": {
-    "before": "<hr><h2>Introduction</h2><p>This is a custom introduction added before the README content.</p>",
-    "after": "<hr><h2>Introduction</h2><p>This is a custom introduction added after the README content.</p>",
-  }
-}
-```
-
-### Roadmap
+## Roadmap
 
 - [x] Add colour theme toggle
 - [x] Add release version display
