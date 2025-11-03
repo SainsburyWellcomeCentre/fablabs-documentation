@@ -112,5 +112,11 @@ See the [open issues](https://github.com/sainsburywellcomecentre/fablabs-documen
 
 ## 📧 Contact
 
-- **Author**: Yuhsuan Chen
+- **Author**: [@DCisHurt](https://github.com/DCisHurt)
 - **Email**: [yuhsuan.chen@ucl.ac.uk](mailto:yuhsuan.chen@ucl.ac.uk)
+
+## ❤ Contributors
+
+ <a href = "https://github.com/sainsburywellcomecentre/fablabs-documentation/graphs/contributors">
+   <img src = "https://contrib.rocks/image?repo=sainsburywellcomecentre/fablabs-documentation" alt="Contributors"/>
+ </a>
