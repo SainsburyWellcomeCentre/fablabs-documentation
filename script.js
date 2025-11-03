@@ -123,13 +123,13 @@ async function showRepo(name) {
 
     const content = document.getElementById('detail-content');
     const loading = document.getElementById('detail-loading');
-    const err    = document.getElementById('detail-error');
+    const err = document.getElementById('detail-error');
 
     content.innerHTML = '';
     loading.style.display = 'block';
     err.style.display = 'none';
 
-    /* ---------- 1. Fetch default_branch ---------- */
+    /* ----------  Fetch default_branch ---------- */
     let defaultBranch = 'main';
     try {
         const repoRes = await fetch(`${API_BASE}/repos/${ORG}/${name}`);
@@ -141,7 +141,7 @@ async function showRepo(name) {
         console.warn(`Using 'main' for ${name}`);
     }
 
-    /* ---------- 2. Latest Release Link ---------- */
+    /* ----------  Latest Release Link ---------- */
     let releaseHtml = '';
     try {
         const releaseRes = await fetch(`${API_BASE}/repos/${ORG}/${name}/releases/latest`);
@@ -155,7 +155,7 @@ async function showRepo(name) {
         releaseHtml = '<div class="release-link"><strong>Latest Release:</strong> No releases yet</div>';
     }
 
-    /* ---------- 3. Load altium-viewer.json (multiple tabs) ---------- */
+    /* ----------  Load altium-viewer.json (multiple tabs) ---------- */
     let viewersHtml = '';
     try {
         const viewerRes = await fetch(`https://raw.githubusercontent.com/${ORG}/${name}/${defaultBranch}/altium-viewer.json`);
@@ -172,15 +172,15 @@ async function showRepo(name) {
                             <div class="altium-tabs">
                                 <div class="altium-tab-buttons">
                                     ${tabs.map((key, i) => {
-                                        const label = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                                        return `<button class="altium-tab-btn ${i === 0 ? 'active' : ''}" data-tab="${key}">${label}</button>`;
-                                    }).join('')}
+                        const label = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        return `<button class="altium-tab-btn ${i === 0 ? 'active' : ''}" data-tab="${key}">${label}</button>`;
+                    }).join('')}
                                 </div>
                                 <div class="altium-tab-content">
                                     ${tabs.map((key, i) => {
-                                        const iframeHtml = addAltiumViewer(addresses[key]);
-                                        return `<div class="altium-tab-pane ${i === 0 ? 'active' : ''}" data-tab="${key}">${iframeHtml}</div>`;
-                                    }).join('')}
+                        const iframeHtml = addAltiumViewer(addresses[key]);
+                        return `<div class="altium-tab-pane ${i === 0 ? 'active' : ''}" data-tab="${key}">${iframeHtml}</div>`;
+                    }).join('')}
                                 </div>
                             </div>
                         </div>
@@ -192,7 +192,7 @@ async function showRepo(name) {
         console.log(`No altium-viewer.json in ${name}`);
     }
 
-    /* ---------- 4. Fetch README ---------- */
+    /* ----------  Fetch README ---------- */
     let markdown = '';
     try {
         const res = await fetch(`${API_BASE}/repos/${ORG}/${name}/readme`);
@@ -209,30 +209,30 @@ async function showRepo(name) {
         return;
     }
 
-    /* ---------- 5. Fix relative URLs ---------- */
+    /* ----------  Fix relative URLs ---------- */
     const rawBase = `https://raw.githubusercontent.com/${ORG}/${name}/${defaultBranch}`;
     markdown = markdown
         .replace(/\]\((?!https?:\/\/|\/)([^)]+)\)/g, `](${rawBase}/$1)`)
         .replace(/src="(?!https?:\/\/|\/)([^"]+)"/g, `src="${rawBase}/$1"`);
 
-    /* ---------- 7. Render Markdown ---------- */
-content.innerHTML = marked.parse(markdown);
+    /* ----------  Render Markdown ---------- */
+    content.innerHTML = marked.parse(markdown);
 
-/* ---------- 8. Fetch release + build top bar ---------- */
-let releaseText = 'No releases yet';
-let releaseUrl = '#';
-try {
-    const releaseRes = await fetch(`${API_BASE}/repos/${ORG}/${name}/releases/latest`);
-    if (releaseRes.ok) {
-        const r = await releaseRes.json();
-        releaseText = r.tag_name || 'Unknown';
-        releaseUrl = r.html_url;
-    }
-} catch {}
+    /* ----------  Fetch release + build top bar ---------- */
+    let releaseText = 'No releases yet';
+    let releaseUrl = '#';
+    try {
+        const releaseRes = await fetch(`${API_BASE}/repos/${ORG}/${name}/releases/latest`);
+        if (releaseRes.ok) {
+            const r = await releaseRes.json();
+            releaseText = r.tag_name || 'Unknown';
+            releaseUrl = r.html_url;
+        }
+    } catch { }
 
-/* ---------- 9. Inject: Release (left) + Jump Button with SVG down arrow (right) ---------- */
-if (viewersHtml) {
-    const topBar = `
+    /* ---------- Inject: Release (left) + Jump Button with SVG down arrow (right) ---------- */
+    if (viewersHtml) {
+        const topBar = `
         <div class="release-jump-container">
             <div class="release-link">
                 <strong>Latest Release:</strong> 
@@ -248,17 +248,17 @@ if (viewersHtml) {
             </div>
         </div>
     `;
-    content.insertAdjacentHTML('afterbegin', topBar);
-} else {
-    content.insertAdjacentHTML('afterbegin', `
+        content.insertAdjacentHTML('afterbegin', topBar);
+    } else {
+        content.insertAdjacentHTML('afterbegin', `
         <div class="release-link">
             <strong>Latest Release:</strong> 
             <a href="${releaseUrl}" target="_blank">${releaseText}</a>
         </div>
     `);
-}
+    }
 
-    /* ---------- 9. Inject viewer at BOTTOM + tab logic ---------- */
+    /* ----------  Inject viewer at BOTTOM + tab logic ---------- */
     if (viewersHtml) {
         content.insertAdjacentHTML('beforeend', viewersHtml);
 
@@ -306,7 +306,7 @@ window.addEventListener('popstate', () => {
     }
 });
 
-// ———————————————————————— THEME TOGGLE (ICON ONLY) ————————————————————————
+// ———————————————————————— THEME TOGGLE  ————————————————————————
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.body;

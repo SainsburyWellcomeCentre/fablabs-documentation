@@ -16,61 +16,85 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-
     <header>
-        <div class="header-content">
+      <div class="header-content">
         <div class="header-top">
-            <!-- UCL Logo on the left -->
-            <div class="header-logo">
-                <img src="https://www.sainsburywellcome.org/web/themes/custom/ucl/logo.svg" alt="UCL Logo" class="ucl-logo">
+          <!-- UCL Logo on the left -->
+          <div class="header-logo">
+            <img
+              src="https://www.sainsburywellcome.org/web/themes/custom/ucl/logo.svg"
+              alt="UCL Logo"
+              class="ucl-logo"
+            />
+          </div>
+
+          <!-- Title in the center -->
+          <h1>FabLabs Documentation</h1>
+
+          <!-- Theme toggle on the right -->
+          <button
+            id="theme-toggle"
+            class="theme-toggle-btn"
+            aria-label="Toggle dark mode"
+          >
+            <div class="theme-icon">
+              <!-- SUN -->
+              <svg
+                class="sun"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="currentColor"
+              >
+                <g transform="translate(12,12)">
+                  <circle r="5" fill="currentColor" />
+                  <g
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  >
+                    <line x1="0" y1="-10" x2="0" y2="-7" />
+                    <line x1="0" y1="10" x2="0" y2="7" />
+                    <line x1="-10" y1="0" x2="-7" y2="0" />
+                    <line x1="10" y1="0" x2="7" y2="0" />
+                    <line x1="-7.07" y1="-7.07" x2="-5" y2="-5" />
+                    <line x1="7.07" y1="-7.07" x2="5" y2="-5" />
+                    <line x1="-7.07" y1="7.07" x2="-5" y2="5" />
+                    <line x1="7.07" y1="7.07" x2="5" y2="5" />
+                  </g>
+                </g>
+              </svg>
+              <!-- MOON -->
+              <svg
+                class="moon"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="currentColor"
+              >
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
             </div>
-
-            <!-- Title in the center -->
-            <h1>FabLabs Documentation</h1>
-
-            <!-- Theme toggle on the right -->
-            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark mode">
-                <div class="theme-icon">
-                    <!-- SUN -->
-                    <svg class="sun" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                        <g transform="translate(12,12)">
-                            <circle r="5" fill="currentColor"/>
-                            <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                                <line x1="0" y1="-10" x2="0" y2="-7"/>
-                                <line x1="0" y1="10" x2="0" y2="7"/>
-                                <line x1="-10" y1="0" x2="-7" y2="0"/>
-                                <line x1="10" y1="0" x2="7" y2="0"/>
-                                <line x1="-7.07" y1="-7.07" x2="-5" y2="-5"/>
-                                <line x1="7.07" y1="-7.07" x2="5" y2="-5"/>
-                                <line x1="-7.07" y1="7.07" x2="-5" y2="5"/>
-                                <line x1="7.07" y1="7.07" x2="5" y2="5"/>
-                            </g>
-                        </g>
-                    </svg>
-                    <!-- MOON -->
-                    <svg class="moon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                    </svg>
-                </div>
-            </button>
+          </button>
         </div>
         <p class="subtitle">Dynamic documentation for FabLabs repositories</p>
 
-      <!-- Search Bar -->
-      <div class="search-container">
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Search repos..."
-          aria-label="Search repositories"
-        />
-        <button id="clear-search" class="clear-btn" style="display: none">
-          x
-        </button>
-      </div>
-              <p style="margin-top: 1rem; font-size: 0.75rem; color: #888">
-            Last refreshed: <span id="last-refresh">—</span> ·
-            <span id="repo-count">—</span> repos
+        <!-- Search Bar -->
+        <div class="search-container">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search repos..."
+            aria-label="Search repositories"
+          />
+          <button id="clear-search" class="clear-btn" style="display: none">
+            x
+          </button>
+        </div>
+        <p style="margin-top: 1rem; font-size: 0.75rem; color: #888">
+          Last refreshed: <span id="last-refresh">—</span> ·
+          <span id="repo-count">—</span> repos
         </p>
       </div>
     </header>
@@ -103,9 +127,7 @@
     </div>
 
     <footer>
-      <p>
-        Copyright &copy; 2025 FabLabs Sainsbury Wellcome Centre
-      </p>
+      <p>Copyright &copy; 2025 FabLabs Sainsbury Wellcome Centre</p>
     </footer>
 
     <script src="script.js" defer></script>
