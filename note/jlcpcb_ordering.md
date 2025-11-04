@@ -19,14 +19,14 @@ Zip gerber and NC drill folder attached in the target release. Recommend naming 
 Navigate to ([JLCPCB website](https://jlcpcb.com/)) and upload the zip file.
 
 <p float="left", align="center">
-   <img src=".img/jlcpcb_order_now.png" alt="[JLCPCB website]" width="500"/>
-   <img src=".img/jlcpcb_upload.png" alt="[Upload Gerber Files]" width="525"/>
+   <img src="../.img/jlcpcb_order_now.png" alt="[JLCPCB website]" width="500"/>
+   <img src="../.img/jlcpcb_upload.png" alt="[Upload Gerber Files]" width="525"/>
 </p>
 
 Fill in the order details with the table provided in the target release.
 
 <p  align="center">
-<img src=".img/jlcpcb_PCB_parameter.png" alt="[Fill PCB Parameters]" width="1500"/>
+<img src="../.img/jlcpcb_PCB_parameter.png" alt="[Fill PCB Parameters]" width="1500"/>
 </p>
 
 ## 3. PCB with assembly order
@@ -41,9 +41,9 @@ If you are placing an order with assembly, you will be asked to upload the BOM a
 
 ```
 
-<img src=".img/jlcpcb_PCB_Assembly_A.png" width="800"/>
-<img src=".img/jlcpcb_PCB_Assembly_B.png" width="800"/>
-<img src=".img/jlcpcb_PCB_Assembly_C.png" width="800"/>
+<img src="../.img/jlcpcb_PCB_Assembly_A.png" width="800"/>
+<img src="../.img/jlcpcb_PCB_Assembly_B.png" width="800"/>
+<img src="../.img/jlcpcb_PCB_Assembly_C.png" width="800"/>
 
 ## 4. Component selection
 
@@ -53,10 +53,10 @@ The website will automatically match the components in your BOM with the availab
 
 **Note:** Not all the components are available at JLCPCB all the time. It is recommended to check the component availability before placing the order. You can use the "Parts Library" feature on JLCPCB website to check the availability of components by JLCPCB part numbers. Order low availability components in advance to avoid delays in your PCB assembly.
 
-<img src=".img/jlcpcb_PCB_Assembly_D.png" alt="[Upload Gerber Files]" width="800"/>
+<img src="../.img/jlcpcb_PCB_Assembly_D.png" alt="[Upload Gerber Files]" width="800"/>
 
 ## 5. Assembly review and confirmation
 
 Before finalizing your order, review the assembly details carefully. Make sure all components are correctly placed and oriented. Right click on the part to change orientation if needed.
 
-<img src=".img/jlcpcb_PCB_Assembly_E.png" alt="[Upload Gerber Files]" width="800"/>
+<img src="../.img/jlcpcb_PCB_Assembly_E.png" alt="[Upload Gerber Files]" width="800"/>
